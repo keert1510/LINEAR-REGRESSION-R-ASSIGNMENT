@@ -1,0 +1,200 @@
+---
+---
+---
+
+# Scatter plot with the regression line can be added here for visualization.
+
+### Apply Model to Test Data
+
+# Evaluating the model using Mean Squared Error (MSE) on both training and test data
+
+\\\\\\\<could interpret the Test MSE\\\\\\\>
+
+```{r apply model to test_data}
+# Calculating the training and test MSE for the linear regression model
+train_mse = mean((train_data$medv - predict(lm.fit, train_data))^2)
+test_mse = mean((test_data$medv - predict(lm.fit, test_data))^2)
+
+print(paste("Training MSE:", round(train_mse, 2)))
+print(paste("Test MSE:", round(test_mse, 2)))
+
+```
+
+### Simple Linear Regression results & interpretation
+
+# Discussing how well the model fits the data and answering the question posed in the analysis
+
+### Perform Multiple Linear Regression on Training Data
+
+# Now adding 'age' as a predictor in the model to see if it improves prediction
+
+\\\\\\\<what question does this model answer?\\\\\\\>
+
+```{r}
+# Fitting a multiple linear regression model to predict 'medv' from 'lstat' and 'age'
+lm.multiple.fit = lm(medv ~ lstat + age, data = train_data)  
+summary(lm.multiple.fit)
+```
+
+### Apply the Model to Test Data
+
+```{r}
+# Calculating training and test MSE for the multiple linear regression model
+train_mse = mean((train_data$medv - predict(lm.multiple.fit, train_data))^2)
+test_mse = mean((test_data$medv - predict(lm.fit, test_data))^2)
+
+print(paste("Training MSE:", round(train_mse, 2)))
+print(paste("Test MSE:", round(test_mse, 2)))
+
+
+
+```
+
+## NHANES Data Analysis
+
+## Objective
+
+# Describing the objective of predicting BMI for individuals between 18 and 70 using certain predictors
+
+please predict BMI using Age, SmokeNow, PhysActive for individuals between the ages of 18 and 70
+
+## Data understanding & Preparation
+
+# Understanding the structure of the data to prepare it for analysis
+
+## Data loading
+
+```{r}
+# Loading NHANES dataset and filtering for relevant columns and age range
+#install.packages("NHANES")
+library(NHANES)
+data(NHANES)
+
+SMOKERS = NHANES %>%
+  select(BMI, Age, SmokeNow, PhysActive) %>%
+  filter(Age >= 18 & Age <= 70)
+
+
+```
+
+## Data Exploration
+
+```{r}
+# Checking for missing values in the selected data
+missing_values <- SMOKERS %>%
+  summarise(across(everything(), ~ sum(is.na(.))))
+
+print(missing_values)
+
+
+
+
+```
+
+## Train - Test Split
+
+```{r}
+# Setting a seed for reproducibility and splitting the SMOKERS data into training and test sets
+# Add the 'id' column to the original dataset (SMOKERS)
+SMOKERS <- SMOKERS %>% mutate(id = row_number())
+
+# Split the data into 75% training and 25% testing
+SMOKERS_split <- SMOKERS %>%
+  sample_frac(0.75)  # 75% for training data
+
+# The remaining 25% will be for testing
+test_data <- anti_join(SMOKERS, SMOKERS_split, by = "id")  # Join using 'id' column
+train_data <- SMOKERS_split
+
+
+
+```
+
+## Exploratory Data Analysis
+
+```{r}
+# Plotting the distribution of BMI values to understand its spread
+ggplot(SMOKERS, aes(x = BMI)) +
+  geom_histogram(fill = "steelblue", binwidth = 5, color = "white") +
+  labs(title = "Distribution of BMI", x = "BMI", y = "Count")
+
+```
+
+## Scatterplot: Age vs. BMI
+
+# Visualizing the relationship between Age and BMI
+
+This helps in visualizing the relationship between **Age** and **BMI**.
+
+```{r}
+ #Scatterplot of Age vs. BMI
+ggplot(SMOKERS, aes(x = Age, y = BMI)) +
+  geom_point(alpha = 0.6, color = 'blue') +
+  labs(title = "Scatterplot: Age vs. BMI", x = "Age", y = "BMI")
+
+
+```
+
+## Scatterplot: SmokeNow vs. BMI
+
+```{r}
+# Boxplot showing the relationship between Smoking status (SmokeNow) and BMI
+ggplot(SMOKERS, aes(x = SmokeNow, y = BMI)) +
+  geom_boxplot(fill = "lightblue", color = "black") +
+  labs(title = "Boxplot: SmokeNow vs. BMI", x = "SmokeNow", y = "BMI")
+
+```
+
+## Model Implementation
+
+### Perform simple Linear Regression on Training Data
+
+```{r}
+# Fitting a simple linear regression model to predict BMI from Age
+#Fit a Simple Linear Regression Model ---
+lm.fit <- lm(BMI ~ Age, data = train_data)
+
+# View Model Summary
+summary(lm.fit)
+
+```
+
+### Apply Model to Text Data
+
+```{r}
+
+# Calculating training and test MSE for the simple linear regression model
+train_mse = mean((train_data$BMI - predict(lm.fit, train_data))^2)
+test_mse = mean((test_data$BMI - predict(lm.fit, test_data))^2)
+
+print(paste("Training MSE:", round(train_mse, 2)))
+print(paste("Test MSE:", round(test_mse, 2)))
+
+```
+
+### Simple Linear Regression results & interpretation
+
+# Interpretation of the results of the simple linear regression model
+
+### Perform Multiple Linear Regression on Training Data
+
+```{r}
+# Fitting a multiple linear regression model to predict BMI using Age, SmokeNow, and PhysActive
+lm.multiple.fit = lm(BMI ~ Age + SmokeNow + PhysActive, data = train_data)  
+summary(lm.multiple.fit)
+
+
+```
+
+### Apply the Model to Test Data
+
+```{r}
+# Calculating the training and test MSE for the multiple linear regression model
+train_mse = mean((train_data$BMI - predict(lm.multiple.fit, train_data))^2)
+test_mse = mean((test_data$BMI - predict(lm.multiple.fit, test_data))^2)
+
+print(paste("Training MSE:", round(train_mse, 2)))
+print(paste("Test MSE:", round(test_mse, 2)))
+
+
+```
